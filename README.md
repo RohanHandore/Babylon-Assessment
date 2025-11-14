@@ -4,11 +4,15 @@ A simple Next.js application with Firebase Authentication featuring user registr
 
 ## Features
 
-- **Login/Registration Page** with Full Name, Email, and Password fields
-- **Input Validation** for all form fields
-- **Firebase Authentication** for user management
+- **Separate Login and Sign Up** tabs for better user experience
+- **Email/Password Authentication** with form validation
+- **Google Sign-In** for quick authentication
+- **Input Validation** for all form fields with helpful error messages
+- **Firebase Authentication** for secure user management
+- **Firestore Integration** for storing user data
 - **Home Page** with personalized greeting and logout functionality
 - **Protected Routes** that redirect unauthenticated users
+- **Responsive Design** with Tailwind CSS
 
 ## Setup Instructions
 
@@ -25,6 +29,11 @@ npm install
 3. Enable **Authentication**:
    - Go to Authentication > Sign-in method
    - Enable **Email/Password** provider
+   - Enable **Google** provider (optional, for Google Sign-In)
+     - Click on Google
+     - Toggle "Enable" to ON
+     - Set a project support email
+     - Click "Save"
 4. Enable **Firestore Database**:
    - Go to Firestore Database
    - Create database in test mode (for development)
@@ -61,18 +70,29 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## How It Works
 
-### Registration Flow
-- When a new user submits the form, the app attempts to log in first
-- If login fails (user not found), it automatically registers the user
+### Registration Flow (Sign Up)
+- Users click the "Sign Up" tab and fill in their Full Name, Email, and Password
+- The app validates all fields before submission
+- New user account is created in Firebase Authentication
 - User's full name is stored in both Firebase Auth (displayName) and Firestore
+- Upon successful registration, users are redirected to the home page
 
 ### Login Flow
-- Existing users can log in with their email and password
+- Users click the "Login" tab and enter their Email and Password
+- The app validates the credentials with Firebase
+- Upon successful authentication, users are redirected to the home page
+- If credentials are invalid, appropriate error messages are displayed
+
+### Google Sign-In
+- Users can click "Sign in with Google" button
+- A popup opens for Google authentication
+- User data is automatically saved to Firestore on first sign-in
 - Upon successful authentication, users are redirected to the home page
 
 ### Home Page
 - Displays a personalized greeting with the user's full name
 - Includes a logout button that signs out the user and redirects to the login page
+- Protected route - unauthenticated users are automatically redirected to login
 
 ## Project Structure
 
@@ -100,8 +120,17 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Notes
 
-- The app automatically handles both registration and login through a single form
+- Separate Login and Sign Up flows for clarity and better UX
 - User data (full name) is stored in Firestore for easy retrieval
 - Routes are protected - unauthenticated users are redirected to the login page
 - The app uses Firebase's `onAuthStateChanged` to monitor authentication state
+- Firebase initializes only on the client side to avoid SSR issues
+
+## Project Summary
+
+This project is a login app built with Next.js and Firebase. The app has a login page with tabs for "Login" and "Sign Up", and users can sign in with email/password or Google. After signing in, they see a personalized home page with their name and a logout button.
+
+The main challenge was getting Firebase to work with Next.js. Firebase needs to run only in the browser, not on the server, so I added checks to initialize it only on the client side. Another issue was the `.env.local` file being in the wrong folder, which prevented Firebase from loading. I moved it to the project root and added validation to catch this early.
+
+For the future, I'd add password reset, email verification, a profile page, and more social login options. I'd also add tests, improve error messages, and add a loading spinner. The app is deployed to Firebase Hosting, so it's live and accessible online. Overall, it's a working authentication system that can be extended with more features as needed.
 
