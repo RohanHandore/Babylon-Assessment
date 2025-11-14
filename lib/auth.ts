@@ -1,6 +1,8 @@
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut,
   User,
   updateProfile,
@@ -97,6 +99,39 @@ export const logoutUser = async (): Promise<void> => {
     await signOut(authInstance);
   } catch (error: any) {
     throw new Error(error.message || "Logout failed");
+  }
+};
+
+export const signInWithGoogle = async (): Promise<User> => {
+  const { authInstance, dbInstance } = checkFirebaseConfig();
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(authInstance, provider);
+    const user = result.user;
+
+    // Store user data in Firestore if it doesn't exist
+    const userDocRef = doc(dbInstance, "users", user.uid);
+    const userDoc = await getDoc(userDocRef);
+    
+    if (!userDoc.exists()) {
+      // New user, save their data
+      await setDoc(userDocRef, {
+        fullName: user.displayName || "User",
+        email: user.email || "",
+        createdAt: new Date().toISOString(),
+        provider: "google",
+      }).catch((firestoreError) => {
+        console.warn("Failed to save user data to Firestore:", firestoreError);
+      });
+    }
+
+    return user;
+  } catch (error: any) {
+    // Preserve Firebase error structure
+    if (error.code) {
+      throw error;
+    }
+    throw new Error(error.message || "Google sign-in failed");
   }
 };
 
